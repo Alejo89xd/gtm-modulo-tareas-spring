@@ -1,0 +1,17 @@
+# Maven
+target/
+
+# Credenciales locales (nunca subir la clave de la base de datos)
+src/main/resources/application-local.properties
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

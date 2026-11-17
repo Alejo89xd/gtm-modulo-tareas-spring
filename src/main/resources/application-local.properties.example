@@ -1,0 +1,3 @@
+# Plantilla: copie este archivo como application-local.properties
+# y escriba la clave real de su usuario de MySQL.
+spring.datasource.password=CAMBIAR_CLAVE
