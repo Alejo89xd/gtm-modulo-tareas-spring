@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabecera('Error')}"></head>
+<body>
+<header th:replace="~{fragmentos :: navegacion}"></header>
+
+<!-- Esta plantilla la usa ManejadorErrores y también la página de error por defecto de Spring Boot -->
+<main class="contenedor">
+  <div class="alerta error" role="alert">
+    <h1 th:text="${titulo} ?: 'Ocurrió un problema'">Ocurrió un problema</h1>
+    <p th:text="${mensaje} ?: 'No se pudo completar la operación.'">Mensaje</p>
+    <p><a class="boton primario" th:href="@{/tareas}">Volver a las tareas</a></p>
+  </div>
+</main>
+
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

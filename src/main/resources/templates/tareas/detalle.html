@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabecera(${'Tarea ' + tarea.id})}"></head>
+<body>
+<header th:replace="~{fragmentos :: navegacion}"></header>
+
+<main class="contenedor">
+  <div class="titulo-pagina">
+    <div>
+      <h1 th:text="${tarea.titulo}">Título</h1>
+      <p class="subtitulo">
+        Tarea #<span th:text="${tarea.id}">1</span> ·
+        <span class="etiqueta" th:classappend="'estado-' + ${tarea.estado.valorBd}"
+              th:text="${tarea.estado.etiqueta}">Pendiente</span>
+        <span class="etiqueta" th:classappend="'prioridad-' + ${tarea.prioridad.valorBd}"
+              th:text="'Prioridad ' + ${tarea.prioridad.etiqueta}">Prioridad Media</span>
+      </p>
+    </div>
+    <div class="acciones">
+      <a class="boton secundario" th:href="@{/tareas}">Volver</a>
+      <a class="boton primario" th:href="@{/tareas/{id}/editar(id=${tarea.id})}">Editar</a>
+      <form class="en-linea" method="post" th:action="@{/tareas/{id}/eliminar(id=${tarea.id})}"
+            onsubmit="return confirm('¿Eliminar esta tarea?');">
+        <button type="submit" class="boton peligro">Eliminar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="alerta exito" th:if="${mensajeExito != null}" th:text="${mensajeExito}"></div>
+  <div class="alerta error" th:if="${mensajeError != null}" th:text="${mensajeError}"></div>
+
+  <div class="rejilla">
+    <section class="tarjeta">
+      <h2>Información</h2>
+      <dl class="datos">
+        <dt>Proyecto</dt><dd th:text="${tarea.proyecto.nombre}">Proyecto</dd>
+        <dt>Creada por</dt><dd th:text="${tarea.creador.nombreCompleto}">Usuario</dd>
+        <dt>Fecha límite</dt>
+        <dd>
+          <span th:if="${tarea.fechaLimite == null}">Sin fecha</span>
+          <span th:if="${tarea.fechaLimite != null and tarea.vencida}" class="vencida"
+                th:text="${tarea.fechaLimite} + ' (vencida)'"></span>
+          <span th:if="${tarea.fechaLimite != null and !tarea.vencida}" th:text="${tarea.fechaLimite}"></span>
+        </dd>
+        <dt>Creada el</dt>
+        <dd th:text="${#temporals.format(tarea.fechaCreacion, 'yyyy-MM-dd HH:mm')}">2026-01-01 08:00</dd>
+        <dt>Descripción</dt>
+        <dd th:text="${tarea.descripcion} ?: 'Sin descripción'">Descripción</dd>
+      </dl>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cambiar estado</h2>
+      <!-- POST: modifica datos. El servicio registra el historial en la misma transacción -->
+      <form class="formulario sin-borde" method="post" th:action="@{/tareas/{id}/estado(id=${tarea.id})}">
+        <div class="campo">
+          <label for="estado">Nuevo estado</label>
+          <select id="estado" name="estado">
+            <option th:each="e : ${estados}" th:value="${e}" th:text="${e.etiqueta}"
+                    th:selected="${e == tarea.estado}"></option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="usuarioId">Realizado por</label>
+          <select id="usuarioId" name="usuarioId" required>
+            <option value="">Seleccione un usuario</option>
+            <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nombreCompleto}"></option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="observacion">Observación</label>
+          <textarea id="observacion" name="observacion" rows="2" maxlength="500"></textarea>
+        </div>
+        <button type="submit" class="boton primario">Actualizar estado</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="tarjeta">
+    <h2>Historial de estados</h2>
+    <p class="vacio" th:if="${#lists.isEmpty(historial)}">Esta tarea aún no tiene cambios de estado registrados.</p>
+    <div class="tabla-contenedor" th:unless="${#lists.isEmpty(historial)}">
+      <table class="tabla">
+        <thead>
+          <tr><th>Fecha</th><th>De</th><th>A</th><th>Usuario</th><th>Observación</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="h : ${historial}">
+            <td th:text="${#temporals.format(h.fechaCambio, 'yyyy-MM-dd HH:mm')}">2026-01-01 08:00</td>
+            <td th:text="${h.estadoAnterior != null ? h.estadoAnterior.etiqueta : '—'}">Pendiente</td>
+            <td th:text="${h.estadoNuevo.etiqueta}">En progreso</td>
+            <td th:text="${h.cambiadoPor.nombreCompleto}">Usuario</td>
+            <td th:text="${h.observacion}">Observación</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

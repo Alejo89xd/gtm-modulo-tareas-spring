@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabecera(${esEdicion} ? 'Editar tarea' : 'Nueva tarea')}"></head>
+<body>
+<header th:replace="~{fragmentos :: navegacion}"></header>
+
+<main class="contenedor">
+  <div class="titulo-pagina">
+    <h1 th:text="${esEdicion} ? 'Editar tarea' : 'Nueva tarea'">Nueva tarea</h1>
+  </div>
+
+  <!-- th:object enlaza el formulario con el objeto TareaFormulario del controlador -->
+  <form class="formulario" method="post" th:object="${tarea}"
+        th:action="${esEdicion} ? @{/tareas/{id}(id=${idTarea})} : @{/tareas}">
+
+    <!-- Errores generales (reglas de negocio del servicio) -->
+    <div class="alerta error" th:if="${#fields.hasGlobalErrors()}">
+      <ul>
+        <li th:each="mensaje : ${#fields.globalErrors()}" th:text="${mensaje}"></li>
+      </ul>
+    </div>
+
+    <div class="campo">
+      <label for="titulo">Título <span class="obligatorio">*</span></label>
+      <input type="text" id="titulo" th:field="*{titulo}" maxlength="200">
+      <small class="error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" th:field="*{descripcion}" rows="4"></textarea>
+      <small class="error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></small>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="proyectoId">Proyecto <span class="obligatorio">*</span></label>
+        <select id="proyectoId" th:field="*{proyectoId}">
+          <option value="">Seleccione un proyecto</option>
+          <option th:each="p : ${proyectos}" th:value="${p.id}" th:text="${p.nombre}"></option>
+        </select>
+        <small class="error" th:if="${#fields.hasErrors('proyectoId')}" th:errors="*{proyectoId}"></small>
+      </div>
+
+      <!-- Al crear se elige el creador; al editar solo se muestra -->
+      <div class="campo" th:unless="${esEdicion}">
+        <label for="creadorId">Creada por <span class="obligatorio">*</span></label>
+        <select id="creadorId" th:field="*{creadorId}">
+          <option value="">Seleccione un usuario</option>
+          <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nombreCompleto}"></option>
+        </select>
+        <small class="error" th:if="${#fields.hasErrors('creadorId')}" th:errors="*{creadorId}"></small>
+      </div>
+      <div class="campo" th:if="${esEdicion}">
+        <label>Creada por</label>
+        <input type="text" th:value="${nombreCreador}" readonly>
+      </div>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="prioridad">Prioridad <span class="obligatorio">*</span></label>
+        <select id="prioridad" th:field="*{prioridad}">
+          <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p.etiqueta}"></option>
+        </select>
+        <small class="error" th:if="${#fields.hasErrors('prioridad')}" th:errors="*{prioridad}"></small>
+      </div>
+
+      <div class="campo">
+        <label for="fechaLimite">Fecha límite</label>
+        <input type="date" id="fechaLimite" th:field="*{fechaLimite}">
+        <small class="error" th:if="${#fields.hasErrors('fechaLimite')}" th:errors="*{fechaLimite}"></small>
+      </div>
+    </div>
+
+    <div class="botones">
+      <button type="submit" class="boton primario" th:text="${esEdicion} ? 'Guardar cambios' : 'Crear tarea'">Guardar</button>
+      <a class="boton secundario" th:href="@{/tareas}">Cancelar</a>
+    </div>
+  </form>
+</main>
+
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

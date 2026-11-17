@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabecera('Tareas')}"></head>
+<body>
+<header th:replace="~{fragmentos :: navegacion}"></header>
+
+<main class="contenedor">
+  <div class="titulo-pagina">
+    <div>
+      <h1>Tareas</h1>
+      <p class="subtitulo" th:text="${#lists.size(tareas)} + ' tarea(s) encontrada(s)'">0 tarea(s)</p>
+    </div>
+    <a class="boton primario" th:href="@{/tareas/nueva}">+ Nueva tarea</a>
+  </div>
+
+  <!-- Mensajes que el controlador deja con addFlashAttribute antes de redirigir -->
+  <div class="alerta exito" th:if="${mensajeExito != null}" th:text="${mensajeExito}"></div>
+  <div class="alerta error" th:if="${mensajeError != null}" th:text="${mensajeError}"></div>
+
+  <!-- Formulario GET: los filtros viajan en la URL (?q=...&estado=...) -->
+  <form class="filtros" method="get" th:action="@{/tareas}">
+    <input type="search" name="q" th:value="${textoBusqueda}" placeholder="Buscar por título...">
+    <select name="estado">
+      <option value="">Todos los estados</option>
+      <option th:each="e : ${estados}" th:value="${e}" th:text="${e.etiqueta}"
+              th:selected="${e == estadoFiltro}"></option>
+    </select>
+    <button type="submit" class="boton">Filtrar</button>
+    <a class="boton secundario" th:href="@{/tareas}">Limpiar</a>
+  </form>
+
+  <div class="vacio" th:if="${#lists.isEmpty(tareas)}">No hay tareas que coincidan con la búsqueda.</div>
+
+  <div class="tabla-contenedor" th:unless="${#lists.isEmpty(tareas)}">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th><th>Título</th><th>Proyecto</th><th>Prioridad</th>
+          <th>Estado</th><th>Fecha límite</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="t : ${tareas}">
+          <td th:text="${t.id}">1</td>
+          <td><a th:href="@{/tareas/{id}(id=${t.id})}" th:text="${t.titulo}">Título</a></td>
+          <td th:text="${t.proyecto.nombre}">Proyecto</td>
+          <td><span class="etiqueta" th:classappend="'prioridad-' + ${t.prioridad.valorBd}"
+                    th:text="${t.prioridad.etiqueta}">Media</span></td>
+          <td><span class="etiqueta" th:classappend="'estado-' + ${t.estado.valorBd}"
+                    th:text="${t.estado.etiqueta}">Pendiente</span></td>
+          <td>
+            <span th:if="${t.fechaLimite == null}">Sin fecha</span>
+            <span th:if="${t.fechaLimite != null and t.vencida}" class="vencida"
+                  th:text="${t.fechaLimite} + ' (vencida)'"></span>
+            <span th:if="${t.fechaLimite != null and !t.vencida}" th:text="${t.fechaLimite}"></span>
+          </td>
+          <td class="acciones">
+            <a class="boton chico" th:href="@{/tareas/{id}(id=${t.id})}">Ver</a>
+            <a class="boton chico secundario" th:href="@{/tareas/{id}/editar(id=${t.id})}">Editar</a>
+            <!-- Eliminar usa POST: nunca debe poder dispararse con solo abrir un enlace -->
+            <form class="en-linea" method="post" th:action="@{/tareas/{id}/eliminar(id=${t.id})}"
+                  onsubmit="return confirm('¿Eliminar esta tarea?');">
+              <button type="submit" class="boton chico peligro">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>
